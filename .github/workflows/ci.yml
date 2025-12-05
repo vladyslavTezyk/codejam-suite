@@ -1,0 +1,125 @@
+name: ci
+
+on:
+  push:
+
+jobs:
+  # Job to run change detection: enable conditional execution of workflow steps and jobs, based on the files modified by pull request, on a feature branch, or by the recently pushed commits
+  changes:
+    # Avoid running the job when a tag is pushed
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+    # Set job outputs to values from filter step
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      code-execution: ${{ steps.filter.outputs.code-execution}}
+    steps:
+      # For pull requests, it's not necessary to checkout the code
+      - name: Check out code
+        uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+            code-execution:
+              - 'code-execution/**'
+
+  code-quality-frontend:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      directory: frontend
+    steps:
+      # Retrieve code from the repository
+      - name: Check out code
+        uses: actions/checkout@v4
+      # Custom action to setup environment
+      - uses: ./.github/actions/common-steps
+        with:
+          directory: $directory
+      # Ensure code is properly formatted
+      - name: Format code
+        run: cd $directory && pnpm run format:ci
+      # Ensure code has no static errors
+      - name: Lint code
+        run: cd $directory && pnpm run lint
+
+  code-quality-backend:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      # Retrieve code from the repository
+      - name: Check out code
+        uses: actions/checkout@v4
+      # Custom action to setup environment
+      - uses: ./.github/actions/common-steps
+        with:
+          directory: backend
+      # Ensure code is properly formatted
+      - name: Format code
+        run: cd backend && pnpm run format:ci
+      # Ensure code has no static errors
+      - name: Lint code
+        run: cd backend && pnpm run lint
+
+  code-quality-code-execution:
+    needs: changes
+    if: ${{ needs.changes.outputs.code-execution == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      directory: code-execution
+    steps:
+      # Retrieve code from the repository
+      - name: Check out code
+        uses: actions/checkout@v4
+      # Custom action to setup environment
+      - uses: ./.github/actions/common-steps
+        with:
+          directory: $directory
+      # Ensure code is properly formatted
+      - name: Format code
+        run: cd $directory && pnpm run format:ci
+      # Ensure code has no static errors
+      - name: Lint code
+        run: cd $directory && pnpm run lint
+
+  test-frontend:
+    needs: code-quality-frontend
+    runs-on: ubuntu-latest
+    env:
+      directory: frontend
+    steps:
+      # Retrieve code from the repository
+      - name: Check out code
+        uses: actions/checkout@v4
+      # Custom action to setup environment
+      - uses: ./.github/actions/common-steps
+        with:
+          directory: $directory
+      # Ensure tests pass
+      - name: Run tests
+        run: cd $directory && pnpm run test
+
+  test-backend:
+    needs: code-quality-backend
+    runs-on: ubuntu-latest
+    env:
+      directory: backend
+    steps:
+      # Retrieve code from the repository
+      - name: Check out code
+        uses: actions/checkout@v4
+      # Custom action to setup environment
+      - uses: ./.github/actions/common-steps
+        with:
+          directory: $directory
+      # Ensure tests pass
+      - name: Run tests
+        run: cd $directory && pnpm run test:db

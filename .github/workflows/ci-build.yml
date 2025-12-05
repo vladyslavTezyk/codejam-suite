@@ -1,0 +1,91 @@
+name: ci-build
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  test-frontend:
+    runs-on: ubuntu-latest
+    env:
+      directory: frontend
+    steps:
+      # Retrieve code from the repository
+      - name: Check out code
+        uses: actions/checkout@v4
+      # Custom action to setup environment
+      - uses: ./.github/actions/common-steps
+        with:
+          directory: $directory
+      # Ensure tests pass
+      - name: Run tests
+        run: cd $directory && pnpm run test
+
+  test-backend:
+    runs-on: ubuntu-latest
+    env:
+      directory: backend
+    steps:
+      # Retrieve code from the repository
+      - name: Check out code
+        uses: actions/checkout@v4
+      # Custom action to setup environment
+      - uses: ./.github/actions/common-steps
+        with:
+          directory: $directory
+      # Ensure tests pass
+      - name: Run tests
+        run: cd $directory && pnpm run test:db
+
+  build-and-publish-frontend:
+    # Ensure frontend tests pass before building and pushing the Docker image
+    needs: test-frontend
+    # Run job only if:
+    # - the commit is tagged starting with v
+    runs-on: ubuntu-latest
+    steps:
+      # Retrieve code from the repository (mandatory prior to using the custom local action)
+      - name: Check out code
+        uses: actions/checkout@v4
+      # Custom action to login to Docker Hub, build and push the Docker image
+      - uses: ./.github/actions/build-common-steps
+        with:
+          directory: "frontend"
+          docker-username: ${{ vars.DOCKERHUB_USERNAME }}
+          docker-token: ${{ secrets.DOCKERHUB_TOKEN }}
+          docker-repository: ${{ vars.DOCKERHUB_REPO_FRONTEND }}
+
+  build-and-publish-backend:
+    # Ensure backend tests pass before building and pushing the Docker image
+    needs: test-backend
+    # Run job only if:
+    # - the commit is tagged starting with v
+    runs-on: ubuntu-latest
+    steps:
+      # Retrieve code from the repository (mandatory prior to using the custom local action)
+      - name: Check out code
+        uses: actions/checkout@v4
+      # Custom action to login to Docker Hub, build and push the Docker image
+      - uses: ./.github/actions/build-common-steps
+        with:
+          directory: "backend"
+          docker-username: ${{ vars.DOCKERHUB_USERNAME }}
+          docker-token: ${{ secrets.DOCKERHUB_TOKEN }}
+          docker-repository: ${{ vars.DOCKERHUB_REPO_BACKEND }}
+
+  build-and-publish-code-execution:
+    # Run job only if:
+    # - the commit is tagged starting with v
+    runs-on: ubuntu-latest
+    steps:
+      # Retrieve code from the repository (mandatory prior to using the custom local action)
+      - name: Check out code
+        uses: actions/checkout@v4
+      # Custom action to login to Docker Hub, build and push the Docker image
+      - uses: ./.github/actions/build-common-steps
+        with:
+          directory: "code-execution"
+          docker-username: ${{ vars.DOCKERHUB_USERNAME }}
+          docker-token: ${{ secrets.DOCKERHUB_TOKEN }}
+          docker-repository: ${{ vars.DOCKERHUB_REPO_CODE_EXECUTION }}
