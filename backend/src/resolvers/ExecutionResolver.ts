@@ -80,7 +80,7 @@ export class ExecutionResolver {
       }
 
       // Create snippet before execution to ensure executions count to be up to date
-      // !TODO: change to a SQL transaction
+      // !TODO: change to a SQL transaction?
       const newExecution = new Execution()
       Object.assign(newExecution, {
         snippet,

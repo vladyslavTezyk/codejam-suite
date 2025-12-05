@@ -67,6 +67,8 @@ export default function EditorContextProvider({
   /**
    *  Show toast once if snippet not found.
    *  Prefer toast in effect (side-effect), not in render (could fire multiple times).
+   * 
+   * TODO: check dependancies to resolve language selection bug
    */
   useEffect(() => {
     if (snippet === null) {
