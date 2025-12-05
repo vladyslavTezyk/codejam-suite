@@ -103,7 +103,7 @@ The application consists of 5 containerized services:
 
 ## 🏁 Get Started
 
-Clone the [GitHub Project](https://github.com/WildCodeSchool/2409-wns-rouge-codejam.git).
+Clone the [GitHub Project](git@github.com:vladyslavTezyk/codejam-suite.git).
 
 Create and setup the `.env` files located at the root of the project directory.
 
@@ -226,7 +226,7 @@ cd ./backend
 pnpm run seed:db
 ```
 
-### Migrations
+<!-- ### Migrations
 
 See [Confluence documentation](https://codejam.atlassian.net/wiki/spaces/~71202049db149a7a68479595e2e2bbf0072440/pages/29130754/Migration+et+backup).
 
@@ -242,7 +242,7 @@ See [Confluence documentation](https://codejam.atlassian.net/wiki/spaces/~712020
 
 ### Data backup and migration
 
-See [Confluence documentation](https://codejam.atlassian.net/wiki/spaces/~71202049db149a7a68479595e2e2bbf0072440/pages/29130754/Migration+et+backup).
+See [Confluence documentation](https://codejam.atlassian.net/wiki/spaces/~71202049db149a7a68479595e2e2bbf0072440/pages/29130754/Migration+et+backup). -->
 
 ## Built with 💖 by
 
