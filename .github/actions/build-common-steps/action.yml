@@ -29,6 +29,11 @@ runs:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-token }}
     # Build and push the properly tagged Docker image to Docker Hub using Buildx. By default, this actions use the Git context so there is no need to use the `actions/checkout` action to check out the repository as this will ne done directly by BuildKit.
+    - name: Debug repo and tag
+      run: |
+        echo "docker-repository='${{ inputs.docker-repository }}'"
+        echo "github.ref_name='${{ github.ref_name }}'"
+    
     - name: Build and push
       uses: docker/build-push-action@v6
       with:
